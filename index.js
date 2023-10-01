@@ -7,8 +7,8 @@ const {
   registerUserFunc,
   loginUserFunc,
   listofSchools,
-} = require("./handlers");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+} = require("./src/handlers");
+require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
 const app = express();
 app.set("view engine", "hbs");

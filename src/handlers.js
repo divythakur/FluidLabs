@@ -4,6 +4,7 @@ const nodemailer = require("nodemailer");
 const handlebars = require("handlebars");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
+const path = require("path");
 
 const registerUserFunc = async (req, res) => {
   const result = await registerUser(req);
@@ -45,7 +46,7 @@ const sendEmail = async (username) => {
         pass: process.env.MAIL_PW,
       },
     });
-    const templateSource = fs.readFileSync("../views/index.hbs", "utf8");
+    const templateSource = fs.readFileSync(path.resolve(__dirname, "./views/index.hbs"), "utf8");
 
     const template = handlebars.compile(templateSource);
 
