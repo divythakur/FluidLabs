@@ -13,7 +13,6 @@ const registerUserFunc = async (req, res) => {
 const registerUser = async (req) => {
   try {
     const parsedBody = req.body;
-    console.log({ parsedBody, req });
     if (!parsedBody) {
       return { statusCode: 400, body: "Bad Request" };
     }
@@ -30,14 +29,12 @@ const registerUser = async (req) => {
 
     return { statusCode: 200, body: "success" };
   } catch (err) {
-    console.log(err);
     if (err.code == 11000) {
       return { statusCode: 400, body: "alreadyExist" };
     }
     return { statusCode: 400, body: "Bad Request" };
   }
 };
-
 const sendEmail = async (username) => {
   try {
     const transporter = nodemailer.createTransport({
@@ -45,7 +42,7 @@ const sendEmail = async (username) => {
       port: 2525,
       auth: {
         user: "cad2ab8c94da63",
-        pass: "cdf0d1b26bcd3b",
+        pass: process.env.MAIL_PW,
       },
     });
     const templateSource = fs.readFileSync("../views/index.hbs", "utf8");
@@ -62,8 +59,6 @@ const sendEmail = async (username) => {
     await transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending email: ", error);
-      } else {
-        console.log("Email sent: ", info.response);
       }
     });
   } catch (err) {
@@ -75,13 +70,11 @@ const sendEmail = async (username) => {
 
 const loginUserFunc = async (req, res) => {
   const result = await checkValidLogin(req.body);
-  console.log({ result });
 
   return res.status(result.statusCode).send({ body: result.body });
 };
 const checkValidLogin = async (userObj) => {
   const person = await User.findOne({ email: userObj.email });
-  console.log(person);
 
   if (!person) {
     return { statusCode: 400, body: "norecord" };
@@ -97,7 +90,7 @@ const checkValidLogin = async (userObj) => {
       { id: person._id, name: person.name, email: person.email },
       process.env.SECRET_KEY_TOKEN
     );
-     return { statusCode: 200, body: { jwtToken } };
+    return { statusCode: 200, body: { jwtToken } };
   }
   return { statusCode: 400, body: "incorrectpassword" };
 };
@@ -105,7 +98,6 @@ const checkValidLogin = async (userObj) => {
 /******************************************************************* */
 
 const listofSchools = async (req, res) => {
-  console.log(req.headers);
   const aunthenticationToken = req.headers.authorization;
   const token = aunthenticationToken?.split(" ")[1];
 
@@ -121,7 +113,6 @@ const authenticateToken = async (token, queryParams) => {
     }
     const verifyToken = await jwt.verify(token, process.env.SECRET_KEY_TOKEN);
 
-    console.log({ verifyToken });
     if (!verifyToken) {
       return { statusCode: 403, body: "Forbidden" };
     }
@@ -129,11 +120,19 @@ const authenticateToken = async (token, queryParams) => {
       limit: queryParams.limit ?? 10,
       offset: queryParams.offset ?? 0,
     };
+    let uri = `http://universities.hipolabs.com/search?limit=${Number(
+      params.limit
+    )}&offset=${Number(params.offset)}`;
+
+    if (queryParams.name) {
+       uri+=`&name=${queryParams.name}`
+    }
+    if (queryParams.country) {
+        uri+=`&country=${queryParams.country}`
+    }
 
     const result = await fetch(
-      `http://universities.hipolabs.com/search?limit=${Number(
-        params.limit
-      )}&offset=${Number(params.offset)}`,
+      uri,
       {
         method: "GET",
       }
