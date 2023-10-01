@@ -17,6 +17,11 @@ const registerUser = async (req) => {
     if (!parsedBody) {
       return { statusCode: 400, body: "Bad Request" };
     }
+    const userInDb = await User.findOne({ email: parsedBody.email });
+    if (userInDb) {
+      return { statusCode: 400, body: "alreadyExist" };
+    }
+
     const userObj = {
       name: parsedBody.name,
       password: parsedBody.password,
@@ -46,7 +51,10 @@ const sendEmail = async (username) => {
         pass: process.env.MAIL_PW,
       },
     });
-    const templateSource = fs.readFileSync(path.resolve(__dirname, "./views/index.hbs"), "utf8");
+    const templateSource = fs.readFileSync(
+      path.resolve(__dirname, "./views/index.hbs"),
+      "utf8"
+    );
 
     const template = handlebars.compile(templateSource);
 
@@ -126,18 +134,15 @@ const authenticateToken = async (token, queryParams) => {
     )}&offset=${Number(params.offset)}`;
 
     if (queryParams.name) {
-       uri+=`&name=${queryParams.name}`
+      uri += `&name=${queryParams.name}`;
     }
     if (queryParams.country) {
-        uri+=`&country=${queryParams.country}`
+      uri += `&country=${queryParams.country}`;
     }
 
-    const result = await fetch(
-      uri,
-      {
-        method: "GET",
-      }
-    );
+    const result = await fetch(uri, {
+      method: "GET",
+    });
     const y = await result.json();
 
     return { statusCode: 201, body: y };
