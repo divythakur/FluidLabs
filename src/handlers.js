@@ -5,6 +5,13 @@ const handlebars = require("handlebars");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
+const stripeHandler = require("stripe");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+
+
+
+const secretKey = process.env.STRIPE_SECRET_KEY
+const stripe = stripeHandler(secretKey)
 
 const registerUserFunc = async (req, res) => {
   const result = await registerUser(req);
@@ -151,7 +158,52 @@ const authenticateToken = async (token, queryParams) => {
     return { statusCode: 403, body: "Forbidden" };
   }
 };
-
 /******************************************************************* */
 
-module.exports = { registerUserFunc, loginUserFunc, listofSchools };
+
+const makePayment = async (req, res) => {
+  const response = await initaite(req);
+
+  res.status(response.statusCode).send({url:response.body});
+};
+
+const initaite = async (req) => {
+  try {
+    const aunthenticationToken = req.headers.authorization;
+    const token = aunthenticationToken?.split(" ")[1];
+
+    if (!token) {
+      return { statusCode: 401, body: "unauthorized" };
+    }
+    const verifyToken = await jwt.verify(token, process.env.SECRET_KEY_TOKEN);
+
+    if (!verifyToken) {
+      return { statusCode: 403, body: "Forbidden" };
+    }
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price_data: {
+            currency: "INR",
+            product_data: {
+              name: "Fluid Labs Project",
+            },
+            unit_amount: 2000,
+          },
+          quantity: req.body.qty,
+        },
+      ],
+      mode: "payment",
+      success_url: process.env.SUCCESS_URL,
+      cancel_url: process.env.ERROR_URL,
+    });
+
+    return { statusCode: 201, body: session.url };
+  } catch (error) {
+    console.log(error);
+    return { statusCode: 400, body: "PaymentFailed" };
+  }
+};
+/******************************************************************* */
+
+module.exports = { registerUserFunc, loginUserFunc, listofSchools, makePayment};
