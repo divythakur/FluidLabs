@@ -6,7 +6,13 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
 const stripeHandler = require("stripe");
+
+
+
+
+
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+
 
 
 
@@ -14,6 +20,7 @@ const secretKey = process.env.STRIPE_SECRET_KEY
 const stripe = stripeHandler(secretKey)
 
 const registerUserFunc = async (req, res) => {
+  
   const result = await registerUser(req);
 
   return res.status(result.statusCode).send({ body: result.body });
@@ -114,7 +121,8 @@ const checkValidLogin = async (userObj) => {
 /******************************************************************* */
 
 const listofSchools = async (req, res) => {
-  const aunthenticationToken = req.headers.authorization;
+   const aunthenticationToken = req.headers.authorization;
+  
   const token = aunthenticationToken?.split(" ")[1];
 
   const authenticateCall = await authenticateToken(token, req.query);
@@ -124,14 +132,14 @@ const listofSchools = async (req, res) => {
 
 const authenticateToken = async (token, queryParams) => {
   try {
-    if (!token) {
-      return { statusCode: 401, body: "unauthorized" };
-    }
-    const verifyToken = await jwt.verify(token, process.env.SECRET_KEY_TOKEN);
+    // if (!token) {
+    //   return { statusCode: 401, body: "unauthorized" };
+    // }
+    // const verifyToken = await jwt.verify(token, process.env.SECRET_KEY_TOKEN);
 
-    if (!verifyToken) {
-      return { statusCode: 403, body: "Forbidden" };
-    }
+    // if (!verifyToken) {
+    //   return { statusCode: 403, body: "Forbidden" };
+    // }
     const params = {
       limit: queryParams.limit ?? 10,
       offset: queryParams.offset ?? 0,
