@@ -32,6 +32,8 @@ app.use(
     extended: true,
   })
 );
+app.set('trust proxy', 1);
+
 
 app.use(
   session({
@@ -43,7 +45,7 @@ app.use(
       // sameSite: "none",
       httpOnly: false,
 
-        secure: true,
+      secure: true,
       maxAge: 1000 * 60 * 60 * 24, // One Week
     },
   })
@@ -113,10 +115,9 @@ passport.use(
       clientID: `548976840554-ahkl0ab0ca5ejn94r30dtvrh08elodta.apps.googleusercontent.com`,
       clientSecret: `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`,
       callbackURL: "/auth/google/callback",
-      proxy:true
+      proxy: true,
     },
     function (__accessToken, __refreshToken, profile, cb) {
-       
       checkAndRegisterUser(
         { idKey: "id", nameKey: "displayName" },
         profile,
@@ -134,8 +135,6 @@ passport.use(
     },
 
     function (__accessToken, __refreshToken, profile, cb) {
-     
-
       checkAndRegisterUser({ idKey: "id", nameKey: "username" }, profile, cb);
       // cb(null, profile);
     }
@@ -154,14 +153,12 @@ mongoose.connect(uri, {
 app.get("/listItems", checkIfAuthenticated, listofSchools);
 
 app.get("/getuserinfo", async (req, res) => {
-  
   if (req.user) {
     const loggeduser = req.user;
     const idKey = loggeduser.ssoID ? "ssoID" : "id";
-   
 
     const user = await UserDetails.findOne({ id: loggeduser[idKey] });
-   
+
     if (user) {
       return res.status(200).send({ body: user });
     }
@@ -195,7 +192,7 @@ app.get(
 );
 app.get("/verify", bodyParser.json(), (req, res) => {
   res.send(` HI ${req.session.count}`);
- });
+});
 
 app.get("/", bodyParser.json(), (req, res) => {
   if (req.session.count) {
@@ -204,7 +201,7 @@ app.get("/", bodyParser.json(), (req, res) => {
     req.session.count = 1;
   }
   res.send(` HI ${req.session.count}`);
- });
+});
 
 app.post("/login", bodyParser.json(), loginUserFunc);
 
@@ -249,12 +246,12 @@ app.get("/fetchUserDetails", bodyParser.json(), (req, res) => {
 
 app.get("/listdoctors", bodyParser.json(), async (req, res) => {
   const specializationCategory = req.query.specialization;
-  
+
   const users = await UserDetails.find({
     accounttype: "doctor",
     specialization: specializationCategory,
   });
-  
+
   if (users) {
     res.status(200).send({ body: users });
     return;
@@ -265,55 +262,47 @@ app.get("/listdoctors", bodyParser.json(), async (req, res) => {
 
 app.post("/bookappointment", bodyParser.json(), async (req, res) => {
   const payload = req.body;
-  
 
   const appointDetails = {
     requestedby: req.user.ssoID,
     doctor: payload.docId,
     status: "Pending",
   };
-  
+
   const appointment = new Appointments(appointDetails);
   await appointment.save();
   res.send("done");
 });
 
 app.get("/appointmentrequests", bodyParser.json(), async (req, res) => {
- 
   if (req.user) {
     const appointments = await Appointments.find({
       doctor: req.user.ssoID,
     });
-   
+
     const result = [];
 
     if (appointments) {
       // const patients = await UserDetails.find({accounttype:"patient"});
-
 
       const user = await UserDetails.find({
         accounttype: "patient",
         id: appointments[0].requestedby,
       });
 
-      
-
-      for (let i=0;i<appointments.length;i++) {
-        const obj= appointments[i];
-         const user = await UserDetails.find({
+      for (let i = 0; i < appointments.length; i++) {
+        const obj = appointments[i];
+        const user = await UserDetails.find({
           accounttype: "patient",
           id: appointments[i].requestedby,
         });
 
-       
         obj.requestedby = user[0].name;
         result.push(obj);
       }
-
-       
     }
 
-    res.status(200).send({body:result});
+    res.status(200).send({ body: result });
     return;
   }
   // const users = await Appointments.find({
@@ -328,50 +317,42 @@ app.get("/appointmentrequests", bodyParser.json(), async (req, res) => {
   res.status(401).send("Unauthorized");
 });
 
-app.patch("/modifystatus",bodyParser.json(),async(req,res)=>{
-  const newStatus= req.body.status;
-  const id = req.body.id
-   const y = await Appointments.findOneAndUpdate({_id:id},{status:newStatus})
-    res.send("Done")
-
-
-})
- 
+app.patch("/modifystatus", bodyParser.json(), async (req, res) => {
+  const newStatus = req.body.status;
+  const id = req.body.id;
+  const y = await Appointments.findOneAndUpdate(
+    { _id: id },
+    { status: newStatus }
+  );
+  res.send("Done");
+});
 
 app.get("/myappointments", bodyParser.json(), async (req, res) => {
-   if (req.user) {
+  if (req.user) {
     const appointments = await Appointments.find({
       requestedby: req.user.ssoID,
     });
     const result = [];
- 
+
     if (appointments) {
       // const patients = await UserDetails.find({accounttype:"patient"});
 
- 
-
-      for (let i=0;i<appointments.length;i++) {
-        const obj= JSON.parse(JSON.stringify(appointments[i]));
-         const user = await UserDetails.find({
+      for (let i = 0; i < appointments.length; i++) {
+        const obj = JSON.parse(JSON.stringify(appointments[i]));
+        const user = await UserDetails.find({
           accounttype: "doctor",
           id: appointments[i].doctor,
         });
 
-         obj.doctor = user[0].name;
-        obj.specialization =user[0].specialization.toUpperCase()
-         result.push(obj);
+        obj.doctor = user[0].name;
+        obj.specialization = user[0].specialization.toUpperCase();
+        result.push(obj);
       }
+    }
 
-     }
-
-   
-
-   
-
-    res.status(200).send({body:result});
+    res.status(200).send({ body: result });
     return;
   }
-  
 
   res.status(401).send("Unauthorized");
 });
