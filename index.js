@@ -23,7 +23,7 @@ require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 const app = express();
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: [`${process.env.BASE_URL}`],
     credentials: true,
   })
 );
@@ -59,7 +59,7 @@ app.set("view engine", "hbs");
 const PORT = process.env.PORT || 80;
 
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Origin", `${process.env.BASE_URL}`);
   res.header("Access-Control-Allow-Credentials", true);
   res.header("Credentials", "include");
 
