@@ -43,7 +43,7 @@ app.use(
       // sameSite: "none",
       httpOnly: false,
 
-      // secure: true,
+       secure: true,
       maxAge: 1000 * 60 * 60 * 24, // One Week
     },
   })
@@ -113,6 +113,7 @@ passport.use(
       clientID: `548976840554-ahkl0ab0ca5ejn94r30dtvrh08elodta.apps.googleusercontent.com`,
       clientSecret: `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`,
       callbackURL: "/auth/google/callback",
+      proxy:true
     },
     function (__accessToken, __refreshToken, profile, cb) {
        
