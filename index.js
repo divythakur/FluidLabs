@@ -41,9 +41,10 @@ app.use(
     resave: true,
     saveUninitialized: false,
     rolling: true,
+    proxy:true,
     cookie: {
        sameSite: "none",
-      httpOnly: false,
+      httpOnly: true,
 
       secure: true,
       maxAge: 1000 * 60 * 60 * 24, // One Week
