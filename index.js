@@ -132,7 +132,7 @@ passport.use(
     {
       clientID: "a52acde061c84310e06a",
       clientSecret: "fc273c9201adbb83f6642b8e4d2ebf61f6e39a5e",
-      callbackURL:  `${process.env.BASE_URL}/auth/github/callback`,
+      callbackURL:  `/auth/github/callback`,
     },
 
     function (__accessToken, __refreshToken, profile, cb) {
