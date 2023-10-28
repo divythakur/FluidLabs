@@ -178,7 +178,7 @@ app.get("/auth/github", passport.authenticate("github"));
 app.get(
   "/auth/google/callback",
   passport.authenticate("google", {
-    successRedirect: "http://localhost:3000/onboarding",
+    successRedirect: `${process.env.BASE_URL}/onboarding`,
     failureRedirect: "/admin/login/?error",
     keepSessionInfo: true,
   })
@@ -187,7 +187,7 @@ app.get(
 app.get(
   "/auth/github/callback",
   passport.authenticate("github", {
-    successRedirect: "http://localhost:3000/onboarding",
+    successRedirect: `${process.env.BASE_URL}/onboarding`,
     failureRedirect: "http://localhost:3000/error",
     keepSessionInfo: true,
   })
