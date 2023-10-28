@@ -42,7 +42,7 @@ app.use(
     saveUninitialized: false,
     rolling: true,
     cookie: {
-      // sameSite: "none",
+       sameSite: "none",
       httpOnly: false,
 
       secure: true,
