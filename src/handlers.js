@@ -194,7 +194,7 @@ const initaite = async (req) => {
           price_data: {
             currency: "INR",
             product_data: {
-              name: "Fluid Labs Project",
+              name: "Ghar Vaidya",
             },
             unit_amount: 2000,
           },
@@ -209,7 +209,7 @@ const initaite = async (req) => {
     return { statusCode: 201, body: session.url };
   } catch (error) {
     console.log(error);
-    return { statusCode: 400, body: "PaymentFailed" };
+    return { statusCode: 400, body: "PaymentFailure" };
   }
 };
 /******************************************************************* */
