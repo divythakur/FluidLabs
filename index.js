@@ -42,13 +42,13 @@ app.use(
     saveUninitialized: false,
     rolling: true,
     proxy:true,
-    cookie: {
-       sameSite: "none",
-      httpOnly: true,
+    // cookie: {
+    //    sameSite: "none",
+    //   // httpOnly: true,
 
-      secure: true,
-      maxAge: 1000 * 60 * 60 * 24, // One Week
-    },
+    //   // secure: true,
+    //   maxAge: 1000 * 60 * 60 * 24, // One Week
+    // },
   })
 );
 
@@ -92,6 +92,7 @@ passport.deserializeUser((userId, done) => {
 });
 
 const checkIfAuthenticated = (req, res, next) => {
+  console.log({requ:req.user})
   if (req.user && req.isAuthenticated()) {
     next();
   } else {
